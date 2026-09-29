@@ -214,56 +214,73 @@ ozet = {
 
 # Aşağıdaki dört grafik rapordaki şekillerle aynı dosyalardır.
 plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10})
-colors = ["#456B89", "#E99B54"]
+renkler = ["#456B89", "#E99B54"]
 
 # Şekil 1: Sınıflar arasındaki dengesizliği göster.
-fig, ax = plt.subplots(figsize=(6.6, 3.4))
-counts = hedef.value_counts().sort_index()
-bars = ax.bar(["Satın alma yok", "Satın alma var"], counts.values, color=colors)
-for bar, count in zip(bars, counts.values):
-    ax.text(bar.get_x() + bar.get_width() / 2, count + 70, f"{count:,}", ha="center")
-ax.set(ylabel="Oturum sayısı", title="Tekrar eden kayıtlar çıkarıldıktan sonra sınıf dağılımı")
-ax.set_ylim(0, counts.max() * 1.14)
-fig.tight_layout()
-fig.savefig(CIKTI_KLASORU / "class_balance.png", dpi=180)
-plt.close(fig)
+sekil, eksen = plt.subplots(figsize=(6.6, 3.4))
+sinif_sayilari = hedef.value_counts().sort_index()
+cubuklar = eksen.bar(["Satın alma yok", "Satın alma var"], sinif_sayilari.values, color=renkler)
+for cubuk, sayi in zip(cubuklar, sinif_sayilari.values):
+    eksen.text(cubuk.get_x() + cubuk.get_width() / 2, sayi + 70, f"{sayi:,}", ha="center")
+eksen.set(ylabel="Oturum sayısı", title="Tekrar eden kayıtlar çıkarıldıktan sonra sınıf dağılımı")
+eksen.set_ylim(0, sinif_sayilari.max() * 1.14)
+sekil.tight_layout()
+sekil.savefig(CIKTI_KLASORU / "class_balance.png", dpi=180)
+plt.close(sekil)
 
 # Şekil 2: Ziyaretçi türleri arasındaki gözlenen oran farkını göster.
-group = veri.groupby("VisitorType")["Revenue"].agg(["count", "mean"]).sort_values("mean")
-fig, ax = plt.subplots(figsize=(6.6, 3.4))
-visitor_labels = {"Returning_Visitor": "Geri dönen", "Other": "Diğer", "New_Visitor": "Yeni"}
-bars = ax.bar([visitor_labels[label] for label in group.index], group["mean"] * 100, color="#456B89")
-for bar, count in zip(bars, group["count"]):
-    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.35, f"n={count}", ha="center", fontsize=9)
-ax.set(ylabel="Satın alma oranı (%)", title="Ziyaretçi türüne göre satın alma oranı")
-ax.set_ylim(0, max(group["mean"] * 100) * 1.23)
-fig.tight_layout()
-fig.savefig(CIKTI_KLASORU / "visitor_type.png", dpi=180)
-plt.close(fig)
+ziyaretci_gruplari = veri.groupby("VisitorType")["Revenue"].agg(["count", "mean"]).sort_values("mean")
+sekil, eksen = plt.subplots(figsize=(6.6, 3.4))
+ziyaretci_etiketleri = {"Returning_Visitor": "Geri dönen", "Other": "Diğer", "New_Visitor": "Yeni"}
+cubuklar = eksen.bar(
+    [ziyaretci_etiketleri[tur] for tur in ziyaretci_gruplari.index],
+    ziyaretci_gruplari["mean"] * 100,
+    color=renkler[0],
+)
+for cubuk, sayi in zip(cubuklar, ziyaretci_gruplari["count"]):
+    eksen.text(
+        cubuk.get_x() + cubuk.get_width() / 2,
+        cubuk.get_height() + 0.35,
+        f"n={sayi}",
+        ha="center",
+        fontsize=9,
+    )
+eksen.set(ylabel="Satın alma oranı (%)", title="Ziyaretçi türüne göre satın alma oranı")
+eksen.set_ylim(0, max(ziyaretci_gruplari["mean"] * 100) * 1.23)
+sekil.tight_layout()
+sekil.savefig(CIKTI_KLASORU / "visitor_type.png", dpi=180)
+plt.close(sekil)
 
 # Şekil 3: Ürün sayfası ziyaretlerinin iki sınıftaki dağılımını göster.
-fig, ax = plt.subplots(figsize=(6.6, 3.4))
-for label, color in [(False, colors[0]), (True, colors[1])]:
-    vals = np.log1p(veri.loc[veri.Revenue == label, "ProductRelated"])
-    ax.hist(vals, bins=35, density=True, alpha=0.58, color=color, label="Satın alma var" if label else "Satın alma yok")
-ax.set(xlabel="log(1 + ziyaret edilen ürün sayfası)", ylabel="Yoğunluk", title="Sonuca göre ürün sayfası ziyaretleri")
-ax.legend(frameon=False)
-fig.tight_layout()
-fig.savefig(CIKTI_KLASORU / "product_pages.png", dpi=180)
-plt.close(fig)
+sekil, eksen = plt.subplots(figsize=(6.6, 3.4))
+for satin_aldi, renk in [(False, renkler[0]), (True, renkler[1])]:
+    sayfa_sayilari = np.log1p(veri.loc[veri.Revenue == satin_aldi, "ProductRelated"])
+    eksen.hist(
+        sayfa_sayilari,
+        bins=35,
+        density=True,
+        alpha=0.58,
+        color=renk,
+        label="Satın alma var" if satin_aldi else "Satın alma yok",
+    )
+eksen.set(xlabel="log(1 + ziyaret edilen ürün sayfası)", ylabel="Yoğunluk", title="Sonuca göre ürün sayfası ziyaretleri")
+eksen.legend(frameon=False)
+sekil.tight_layout()
+sekil.savefig(CIKTI_KLASORU / "product_pages.png", dpi=180)
+plt.close(sekil)
 
 # Şekil 4: Seçilen modelin test hatalarını dört grupta göster.
-fig, ax = plt.subplots(figsize=(5.2, 3.8))
+sekil, eksen = plt.subplots(figsize=(5.2, 3.8))
 ConfusionMatrixDisplay(
     confusion_matrix=np.asarray(sonuclar[secilen_model_adi]["test"]["confusion_matrix"]),
     display_labels=["Satın alma yok", "Satın alma var"],
-).plot(ax=ax, cmap="Blues", colorbar=False, values_format="d")
-ax.set_title("Test karmaşıklık matrisi: Random Forest")
-ax.set_xlabel("Tahmin")
-ax.set_ylabel("Gerçek")
-fig.tight_layout()
-fig.savefig(CIKTI_KLASORU / "confusion_matrix.png", dpi=180)
-plt.close(fig)
+).plot(ax=eksen, cmap="Blues", colorbar=False, values_format="d")
+eksen.set_title("Test karmaşıklık matrisi: Random Forest")
+eksen.set_xlabel("Tahmin")
+eksen.set_ylabel("Gerçek")
+sekil.tight_layout()
+sekil.savefig(CIKTI_KLASORU / "confusion_matrix.png", dpi=180)
+plt.close(sekil)
 
 print(f"Analiz tamamlandı. Seçilen model: {secilen_model_adi}")
 print(f"Test F1: {sonuclar[secilen_model_adi]['test']['f1']:.3f}")
